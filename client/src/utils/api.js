@@ -203,16 +203,29 @@
 
 
 import axios from 'axios';
+import { API_CONFIG } from '../config/api.js';
 
 // Create an axios instance with default config
 export const api = axios.create({
-  baseURL: process.env.NODE_ENV === 'production' 
-    ? 'https://your-backend-url.vercel.app/api'  // Replace with your actual backend URL
-    : '/api',
+  baseURL: API_CONFIG.baseURL,
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+// Test API connectivity
+export const testAPI = async () => {
+  try {
+    console.log('Testing API connection to:', API_CONFIG.baseURL);
+    const response = await api.get('/');
+    console.log('API test successful:', response.data);
+    return true;
+  } catch (error) {
+    console.error('API test failed:', error.message);
+    console.error('Full error:', error);
+    return false;
+  }
+};
 
 // User API calls
 export const userAPI = {

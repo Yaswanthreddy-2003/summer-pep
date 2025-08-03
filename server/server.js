@@ -14,8 +14,12 @@ const app = express();
 
 // Middleware
 const allowedOrigins = [
-  'http://localhost:3000', // or 5173 or 8000, depending on your local setup
-  'https://summer-pep-qoz3.vercel.app' // your deployed frontend URL
+  'http://localhost:3000',
+  'http://localhost:8000', 
+  'http://localhost:8001',
+  'http://localhost:8002',
+  'https://summer-pep-xnka.vercel.app', // your current frontend URL
+  'https://summer-pep-qoz3.vercel.app'  // backup URL
 ];
 
 app.use(cors({
