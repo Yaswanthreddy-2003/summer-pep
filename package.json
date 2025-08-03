@@ -1,0 +1,23 @@
+{
+  "name": "neighborfit",
+  "version": "1.0.0",
+  "description": "A full-stack web application that solves the neighborhood-lifestyle matching problem",
+  "main": "index.js",
+  "scripts": {
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm run dev",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "install-all": "npm install && cd server && npm install && cd ../client && npm install"
+  },
+  "keywords": [
+    "neighborhood",
+    "lifestyle",
+    "matching",
+    "algorithm"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "concurrently": "^8.0.1"
+  }
+}
