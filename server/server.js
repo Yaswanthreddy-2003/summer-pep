@@ -18,14 +18,35 @@ const allowedOrigins = [
   'http://localhost:8000', 
   'http://localhost:8001',
   'http://localhost:8002',
-  'https://summer-pep-xnka.vercel.app', // your current frontend URL
+  'https://summer-pep-xnka.vercel.app', // main frontend URL
+  'https://summer-pep-xnka-ln4ue21x6-yaswanthreddy-2003s-projects.vercel.app', // current deployment URL
   'https://summer-pep-qoz3.vercel.app'  // backup URL
 ];
 
-app.use(cors({
-  origin: allowedOrigins,
+// More flexible CORS for Vercel deployments
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Check if origin is in allowed list
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      return callback(null, true);
+    }
+    
+    // Allow any subdomain of vercel.app for your project
+    if (origin.includes('summer-pep') && origin.includes('vercel.app')) {
+      return callback(null, true);
+    }
+    
+    // Reject other origins
+    const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+    return callback(new Error(msg), false);
+  },
   credentials: true
-}));
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Connect to MongoDB
