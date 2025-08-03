@@ -51,9 +51,19 @@ app.use(express.json());
 
 // Connect to MongoDB
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/neighborfit';
+console.log('🔗 Attempting MongoDB connection...');
+console.log('📍 MONGO_URI exists:', !!process.env.MONGO_URI);
+console.log('🌍 NODE_ENV:', process.env.NODE_ENV);
+
 mongoose.connect(MONGO_URI)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.error('MongoDB connection error:', err));
+  .then(() => {
+    console.log('✅ Connected to MongoDB successfully');
+    console.log('📊 Connection state:', mongoose.connection.readyState);
+  })
+  .catch(err => {
+    console.error('❌ MongoDB connection error:', err.message);
+    console.error('🔍 Full error:', err);
+  });
 
 // Routes
 app.use('/api/users', userRoutes);
@@ -69,25 +79,56 @@ app.get('/', (req, res) => {
 // Health check route
 app.get('/api/health', async (req, res) => {
   try {
-    // Check database connection
-    const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+    // Check database connection status
+    const dbState = mongoose.connection.readyState;
+    const dbStateText = {
+      0: 'disconnected',
+      1: 'connected',
+      2: 'connecting',
+      3: 'disconnecting'
+    }[dbState] || 'unknown';
     
-    // Test a simple database query
-    await mongoose.connection.db.admin().ping();
+    // Check environment variables
+    const envCheck = {
+      mongoUriExists: !!process.env.MONGO_URI,
+      jwtSecretExists: !!process.env.JWT_SECRET,
+      nodeEnv: process.env.NODE_ENV || 'not_set'
+    };
     
-    res.json({
-      status: 'OK',
-      database: dbStatus,
+    let dbPingResult = null;
+    if (dbState === 1 && mongoose.connection.db) {
+      // Only ping if connected and db object exists
+      try {
+        await mongoose.connection.db.admin().ping();
+        dbPingResult = 'success';
+      } catch (pingError) {
+        dbPingResult = `ping_failed: ${pingError.message}`;
+      }
+    } else {
+      dbPingResult = 'not_connected';
+    }
+    
+    const isHealthy = dbState === 1 && dbPingResult === 'success';
+    
+    res.status(isHealthy ? 200 : 500).json({
+      status: isHealthy ? 'OK' : 'ERROR',
+      database: {
+        state: dbStateText,
+        stateCode: dbState,
+        ping: dbPingResult
+      },
+      environment: envCheck,
       timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV || 'development'
+      mongoUri: process.env.MONGO_URI ? 'SET' : 'NOT_SET'
     });
   } catch (error) {
     console.error('Health check failed:', error);
     res.status(500).json({
       status: 'ERROR',
-      database: 'error',
+      database: 'health_check_error',
       error: error.message,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      mongoUri: process.env.MONGO_URI ? 'SET' : 'NOT_SET'
     });
   }
 });

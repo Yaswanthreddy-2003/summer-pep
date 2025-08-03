@@ -213,6 +213,23 @@ export const api = axios.create({
   },
 });
 
+// Add request interceptor for debugging
+api.interceptors.request.use(
+  (config) => {
+    console.log('🌐 API Request:', {
+      method: config.method?.toUpperCase(),
+      url: config.url,
+      baseURL: config.baseURL,
+      fullURL: `${config.baseURL}${config.url}`
+    });
+    return config;
+  },
+  (error) => {
+    console.error('❌ Request Error:', error);
+    return Promise.reject(error);
+  }
+);
+
 // Test API connectivity
 export const testAPI = async () => {
   try {

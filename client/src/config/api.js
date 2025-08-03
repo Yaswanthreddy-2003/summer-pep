@@ -47,5 +47,6 @@ console.log('🔧 Environment Config:', {
   envVar: import.meta.env.VITE_API_URL,
   mode: import.meta.env.MODE,
   isDev: import.meta.env.DEV,
-  isProd: import.meta.env.PROD
+  isProd: import.meta.env.PROD,
+  finalApiUrl: API_CONFIG.baseURL
 });
